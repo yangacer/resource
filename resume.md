@@ -10,7 +10,7 @@ Acer Yang
 
 - Part-time Engineer at Ookon (July 2009 - Aug 2012 )
 
-### Characteristic
+### Characteristics
 
   Independent, responsible, humourous, and friendly.
 
