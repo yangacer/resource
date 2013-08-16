@@ -46,6 +46,9 @@ Acer Yang
 
 - CMake, gdb, and git.
 
+- Linux and FreeBSD.
+
+
 ### More Information
 
 - [Linkedin](http://tw.linkedin.com/pub/acer-yang/2b/a9a/872)
