@@ -8,7 +8,7 @@ Acer Yang
 
 - Sr. Engineer at Ookon (Sep 2012 - Aug 2013)
 
-- Partime Engineer at Ookon (July 2009 - Aug 2012 )
+- Part-time Engineer at Ookon (July 2009 - Aug 2012 )
 
 ### Characteristic
 
