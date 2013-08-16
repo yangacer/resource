@@ -36,6 +36,10 @@ Acer Yang
 
   Experienced with I/O optimization and memory movement minimization (aka zero-copy). 
 
+- Information Retrieval
+
+  Well understanding of Unihan issue, maximum segmentation, and inverted indexing.
+
 ### Skills
 
 - C/C++, Bash Shell Script, ECMA Script, and PHP.
