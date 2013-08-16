@@ -12,7 +12,7 @@ Acer Yang
 
 ### Characteristic
 
-  Independent, responsible, humour, and friendly.
+  Independent, responsible, humourous, and friendly.
 
 ### Expertise
 
