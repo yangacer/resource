@@ -1,8 +1,8 @@
-# Resume
+## Resume
 
 Acer Yang
 
-# Education adn Experience
+### Education adn Experience
 
 - PhD candidate at National Chung Cheng Univ.
 
@@ -10,11 +10,11 @@ Acer Yang
 
 - Partime Engineer at Ookon (July 2009 - Aug 2012 )
 
-# Characteristic
+### Characteristic
 
   Independent, responsible, humour, and friendly.
 
-# Expertise
+### Expertise
 
 - Asynchronous Network Programming
 
@@ -36,13 +36,13 @@ Acer Yang
 
   Experienced with I/O optimization and memory movement minimization (aka zero-copy). 
 
-# Skills
+### Skills
 
 - C/C++, Bash Shell Script, ECMA Script, and PHP.
 
 - CMake, gdb, and git.
 
-# More Information
+### More Information
 
 - [Linkedin](http://tw.linkedin.com/pub/acer-yang/2b/a9a/872)
 
