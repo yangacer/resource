@@ -118,6 +118,81 @@ Eiffel 中的類別都可以呼叫 io，因為該 io 為 STD_FILES 型別，此�
 被定義而 ANY 是被所有的類別隱式繼承。既然 io 傳回的物件為 STD_FILES 型別
 ，STD_FILES 中的特徵得以被呼叫。
 
+STL_FILES 有特徵 put_string 接受一個字串參數。該特徵 put_string 是一個命令因為
+它沒有任何回傳值。它將字串參數輸出至標準輸出。而特徵 put_new_line 做的事情如字面
+所述(譯：輸出換行)。
+
+特徵的概念是 Eiffel 語言的基礎，因此以下解釋一些基本觀念：
+
+一個特徵有兩種觀點─使用者或客戶端觀點，與實作觀點。由客戶端觀點，我們會區分查詢
+與命令。一個查詢可接受零或多個參數並傳回一個值。雖然語言本身並未強迫，不過一個
+查詢最好可以不含有副作用(譯：例如改變物件狀態，類似 C++ const member function 
+概念)。一個命令一樣可以接受零或多個參數但沒有回傳值，它通常都被預期會改變物件
+狀態。
+
+因此，一個查詢可以屬性或函式實作，一個命令則需以程序實作。(?)
+
+在兩個雙引號間的字串序列，像是 "Hello, world"，被稱為字串或字串常數。特殊字元如
+換行或退格可藉由逸出序列包含在字串中。例如 %N 與 %T 為換行與退格的逸出序列。所以
+我們也能這樣寫
+
+```
+io.put_string("Hello, world%N")
+```
+
+得到與下面程式同樣的輸出
+
+```
+io.put_string ("Hello, world")
+io.put_new_line
+```
+
+果想要依照程式碼中的格式輸出含有多個換行的字串，可以使用 verbatim 字串，例如
+
+```
+io.put_string ("[
+  	usage: tecomp options ace_file
+ 
+		options
+			-t{p,v,e}{0,1,2,3}	trace parsing, validation,
+						execution with level 0,1,2,3
+			-ws{0,1,2,3}		write statistics
+  		 ]")
+```
+
+會完全依照程式碼中字串的格式做輸出(譯：保留所有空白字元)。
+
+將多行 vertatim 字串擺在 "[" 與 "]" 之間會移除每一行的"最長相同前綴空白字元
+(longest common whitespace prefix)" (即向左對齊)。若擺在 "{" 與 "}" 間則會直接
+複製所有字串而不移除任何前綴。Verbatim 字串常數與此文件語法和許多 UNIX shell 
+類似。
+
+若想在原碼中的字串換行但不希望換行包含在字串時，可使用包裝字串。陳述式
+
+```
+io_put_string ("Hello, %
+		%world")
+```
+
+與下面有相同輸出。
+
+```
+io.put_string("Hello, world%N")
+```
+
+在兩個 '%' 符號中的空白字元會在建構字串常數的過程中被忽略。
+
+ANY 類別還有另一個特徵 print 用來將任何物件輸出到標準輸出。所以最短的 Hello world程式長得像這樣
+
+```
+class HELLO create make feature
+	make 
+		do
+			print("Hello, world%N")
+		end
+end
+```
+
 
 # 區域變數、計算式與迴圈
 
