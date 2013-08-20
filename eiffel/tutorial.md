@@ -216,3 +216,14 @@ end
 
 # 連結串列
 
+
+# 中英對照
+
+```
+類別 class
+物件 object
+程序 procedure
+特徵 feature
+逸出序列 escaped sequence
+屬性 attribute
+```
