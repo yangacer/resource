@@ -53,7 +53,8 @@ cluster
 end
 ```
 
-目前的 tecomp 版本需給定安裝目錄的絕對路徑或相對路徑，未來版本會支援符號定義方式。你可以鍵入以下命令來編譯與執行該程式
+目前的 tecomp 版本需給定安裝目錄的絕對路徑或相對路徑，未來版本會支援符號定義方式。你可以
+鍵入以下命令來編譯與執行該程式
 
 ```
 	tecomp hello.ace
@@ -70,7 +71,8 @@ end
 根類別名為 HELLO 而跟程序為 make。
 
 編譯器得知道如何找到類別；類別存在於通常以系統目錄實現的叢集 (cluster) 中。上面的
-ace-file 定義了兩個叢集─ "./" (即當前目錄) 與 "`path_to_tecomp_installation'/library/kernel" (即 Eiffel 核心類別存放處。編譯器會在這些叢集中搜尋類別，當你的程式中
+ace-file 定義了兩個叢集─ "./" (即當前目錄) 與 "`path_to_tecomp_installation'/library/kernel" 
+(即 Eiffel 核心類別存放處。編譯器會在這些叢集中搜尋類別，當你的程式中
 使用了一個搜尋不到的類別，編譯器則會提報錯誤。叢集中的 Eiffel 類別集合稱為 universe。
 
 執行一個 Eiffel 程式從建立一個根型別的物件並呼叫其根程序開始 (此處型別與類別兩詞
@@ -193,8 +195,89 @@ class HELLO create make feature
 end
 ```
 
-
 # 區域變數、計算式與迴圈
+
+下一個程式使用公式
+
+```
+degree Celsius = (5/9)( degree Fahrenheit - 32 )
+```
+
+印出以下的華氏攝氏溫度對照表：
+
+```
+	0       -17
+	20      -6
+	40      4
+	60      15
+	80      26
+	100     37
+	120     48
+	140     60
+	160     71
+	180     82
+	200     93
+	220     104
+	240     115
+	260     126
+	280     137
+	300     148
+```
+
+此表可以下面的 Eiffel 程式輸出
+
+```
+class
+	FAHR_CELSIUS 
+		-- 印出華氏-攝氏對照表
+create
+	make
+feature
+	make
+		local
+			fahr: INTEGER -- 華氏溫度
+		do
+			from
+				fahr := 0
+			until
+				fahr > 300
+			loop
+				io.put_character('%T')
+				io.put_integer	(fahr)
+				io.put_character('%T')
+				io.put_integer  ((fahr-32) * 5 // 9)
+				io.put_new_line
+				fahr := fahr + 20
+			end
+		end
+end
+```
+
+任何在 '--' 與行尾間的字元都會被編譯器忽略，這些字元可作為註解。
+
+Eiffel 中，區域變數可在各個函式中的 do end 區塊前宣告。上面的程式中，區域變數
+fahr 宣告為 INTEGER 型別；Eiffel 是強型別語言，因此任何變數，運算式等都必須
+對應一個型別。 在 Eiffel 裡，一個 INTEGER 是介於 -2^31 至 2^31 - 1 之間的數值
+，意即 INTEGER 至少有 32 位元。
+
+INTEGER 為核心函式庫中的一個類別。
+
+FAHR_CELSIUS 的程序 _make_  含有一迴圈，由初始化區段、終止條件、與迴圈本體組成。
+在 Eiffel 裡一個迴圈運作如下。
+
+	- 執行初始化區段 (from ...)
+
+	- 測試終止條件 (until ...)
+
+	- 當條件為假，迴圈本體 (loop ...) 即被執行，之後再次測試終止條件
+
+	- 一旦終止條件為真，迴圈終止並執行迴圈(... end)之後的第一個陳述式
+
+運算式 ```(fahr-32) * 5 // 9``` 是一個整數運算式，適用通用的計算規則。因此
+fahr-32 必須加上括號。運算子 // 代表整數除法。
+
+字元放在兩個單引號之前，'a' 代表字元 _a_. '%T' 代表特殊字元退格。
+
 
 # 字元輸入與輸出
 
@@ -224,6 +307,7 @@ end
 物件 object
 程序 procedure
 特徵 feature
+叢集 cluster
 逸出序列 escaped sequence
 屬性 attribute
 ```
