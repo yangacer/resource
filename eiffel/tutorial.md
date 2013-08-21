@@ -704,6 +704,60 @@ initialize
 
 譯：digital_counter 不見了？為何是區域變數？
 
+沒甚麼特別的地方，初始化計數器物件、前條件聲明 char_counter 已被恰當初始化。
+之後的程序可以倚賴這個性質。
+
+接著程序 read_input 更簡單
+
+```
+read_input
+  require
+    char_counter.count = 256
+  local
+    c: CHARACTER
+  do
+    from
+      io.read_character
+    until
+      io.end_of_file
+    loop
+      c := io.last_character
+      char_counter[c.code].increment
+      io.read_character
+    end
+  end
+```
+
+每次讀取字元 c 時，只要透過```char_counter[c.code]```取得對應的參照並呼叫其特
+徵 increment 即可。
+
+前條件表明該程序預期 char_counter 陣列已被妥善初始化。若前條件未被滿足，
+read_character 可能會越界存取 char_counter 陣列。
+
+接著是 write_statistics
+
+```
+write_statistics
+  require
+    digit_counter.count = 10
+  local
+    i: INTEGER
+  do
+    io.put_string ("digits = ")
+    from i := 0 until i = 10 loop
+      io.put_character (' ')
+      io.put_integer ( digit_counter[i].value )
+      i := i + 1
+    end
+    io.put_string   ( ", white space = " )
+    io.put_integer  ( white_counter.value )
+    io.put_string   ( ", other = " )
+    io.put_integer  ( other_counter.value )
+    io.put_new_line
+  end
+```
+
+TODO These 3 routine obviouly won't get compiled.
 
 
 # 函式
