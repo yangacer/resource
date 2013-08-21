@@ -576,6 +576,134 @@ end
 注意：因為不須括號(譯：與 C 相較)，elseif 關鍵字不含任何空白！
 ```
 
+一個複合 (compound) 是任一合法 Eiffel 陳述句的序列。條件式陳述句的行為與其他
+語言，如 C, java 等相同。
+
+字元能以通用的關係運算元作比較。每個字元有對應的編碼 (通常是 ascii 編碼) ，
+CHARACTER 類別含有一個 code 查詢可回傳對應的字元編碼，條件
+```'0' <= c and c <= '9' ```測試 c 是否為數字。
+
+為表示特殊字元如換行等，Eiffel 字元常數能以逸出序列寫為 '%N' 與 '%T' 分別代
+表換行與退格字元。
+
+對常數使用特徵與進行運算時，有一點得先了解─字元常數 '0' 是一個型別為 CHARACTER
+的運算式，因此，對字元常數所代表的物件，所有 CHARACTER 的特徵都可以被呼叫。
+
+然而，無法直接以```'0'.code```來呼叫，因為這將造成模稜兩可的語法而無法解析。
+要將常數當成物件來使用時，我們必須加上括號，意即，```('0').code```表示 '0' 字
+元的編碼。
+
+雖然這個程式有點矯情 (誰會想要統計檔案裡的數字？) 我們仍要寫一個不同版本來展
+示更多 Eiffel 技巧 (譯：再矯情一下)。
+
+上面的程式用條件式陳述句來判斷字元的種類。不考量 unicode 的狀況下其實我們只
+有 256 個不同的字元，因此可用一個陣列來輔助判斷。
+
+主要的想法是用一個大小為 256 的陣列，每一個陣列元數參照一個計數器，三個空白
+字元的元素應該要參照到同一個空白字元計數器。對應數字的元素參照數字字元計數器
+，其它元素則參照剩下的它類字元計數器。
+
+設計一個計數物件不難：
+
+```
+class COUNTER_OBJECT feature
+	value: INTEGER
+	increment do value := value + 1 end
+invariant
+	value >= 0
+end
+```
+
+類別與對應的型別只能是複製語意或是參照語意。COUNTER_OBJECT 類別使用參照語意。
+INTEGER 類別是複製語意，它的宣告類似
+
+```
+expanded class INTEGER ... end
+```
+
+使用了 expanded 關鍵字來宣告具參照語意的類別。複製與參照語意間的差異性，對於
+賦值、參數傳遞與使用 = 比對運算元而言，相當重要。
+
+有參照語意的物件在被賦值與傳遞(call by reference)時，物件不會被複製，僅參照
+被複製到目的地。比對運算元 = 只有在左右兩邊參照同一物件時為真。
+
+若想要比對被參照物件的等價性(內容相同)，必須要使用等價比對運算元 ~ 。對於使用
+複製語意的類別，比對運算元 = 與 ~ 是同義的。
+
+在 COUNTER_OBJECT 中我們宣告了類別不變性。
+
+```
+invariant
+	value >= 0
+```
+
+類別不變性可以宣告在類別的最後面 (最後一個特徵區塊後) 。它是一種恆常性條件，
+表明在每個特徵被叫用前後，該恆常性條件必須被滿足。
+
+當類別擁有許多屬性時，加上類別不變性是相當有利的。有時為了增加或改良特徵而
+延伸(extend)類別，人們會忘了滿足不變性，這時打開斷言監控可以讓執行期監控
+在不變性被違反時給予提示。
+
+有了 COUNTER_OBJECT 類別，數字統計程式可以簡單完成，這裡先給出架構如下：
+
+```
+class COUNT_DIGIT2 create make feature {NONE}
+	white_counter, other_counter: COUNTER_OBJECT
+	char_counter:		ARRAY[COUNTER_OBJECT]
+
+	make
+		do
+			initialize
+			read_input
+			write_statistics
+		end
+	iniialize
+		...
+
+	read_input
+		...
+
+	write_statistics
+		...
+end
+```
+
+既然這個程式有點長，為了提供較好的可讀性與可維護性，我們將它切割成三個程序
+initialize, read_input 與 write_statics。
+
+initialize 程序初始化計數器物件與陣列，read_input 掃描輸入並妥善地遞增計數器
+，而 write_statistics 在程式結束前給我們預期的輸出。
+
+這三個程序須能夠存取計數器，因此我們將計數器作為屬性來使用，藉以避免參數
+傳遞。
+
+initialize 的程式碼如下：
+
+```
+initialize
+	local
+		co: COUNTER_OBJECT
+		i: INTEGER
+	do
+		create white_counter; create other_counter
+		create char_counter.make_filled(other_counter, 0, 255)
+
+		from i:= ('0').code until i = ('9').code + 1 loop
+			create co
+			char_counter[i] := co
+			i := i + 1
+		end
+
+		char_counter[('%N').code] := white_counter
+		char_counter[('%T').code] := white_counter
+		char_counter[(' ').code] := white_counter
+	ensure
+		char_counter.count = 256
+	end
+```
+
+譯：digital_counter 不見了？為何是區域變數？
+
 
 
 # 函式
@@ -602,4 +730,8 @@ end
 逐字字串 verbatime string
 逸出序列 escaped sequence
 屬性 attribute
+前條件 precondition
+後條件 postcondition
+不變性 invariant
+恆常性條件 consistency condition
 ```
