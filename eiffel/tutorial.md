@@ -265,25 +265,169 @@ INTEGER 為核心函式庫中的一個類別。
 FAHR_CELSIUS 的程序 _make_  含有一迴圈，由初始化區段、終止條件、與迴圈本體組成。
 在 Eiffel 裡一個迴圈運作如下。
 
-	- 執行初始化區段 (from ...)
+- 執行初始化區段 (from ...)
 
-	- 測試終止條件 (until ...)
+- 測試終止條件 (until ...)
 
-	- 當條件為假，迴圈本體 (loop ...) 即被執行，之後再次測試終止條件
+- 當條件為假，迴圈本體 (loop ...) 即被執行，之後再次測試終止條件
 
-	- 一旦終止條件為真，迴圈終止並執行迴圈(... end)之後的第一個陳述式
+- 一旦終止條件為真，迴圈終止並執行迴圈(... end)之後的第一個陳述式
 
 運算式 ```(fahr-32) * 5 // 9``` 是一個整數運算式，適用通用的計算規則。因此
 fahr-32 必須加上括號。運算子 // 代表整數除法。
 
 字元放在兩個單引號之前，'a' 代表字元 _a_. '%T' 代表特殊字元退格。
 
-
 # 字元輸入與輸出
+
+核心函式庫讓我們得以讀寫檔案；一個檔案可視為一連串以換行符號分隔的行，每一
+行則為一個字元的序列。這樣的觀點是獨立於平台或作業系統的；在某些系統上
+(如 Windows)，每一行其實是以兩個字元分隔，分別為 carriage return 與 linefeed。
+核心函示庫會對應不同的系統，讓 Eiffel 程式處理的每一行都是以換行字元分隔。
+
+每個 Eiffel 程式會開啟三個標準輸出入檔案，或稱文字串流(text stream)：
+standard_input, standard_output, 與 standard_error。
+依照預設，standard_input 對應到鍵盤，standard_output 與 standard_error 
+對應到螢幕。當使用管線 (pipes) 或輸出入重導時，標準輸出入檔案也指向實體檔案
+或暫存緩衝區。程式從 standard_input 讀取並寫出到 standard_output 時並不需要
+關心檔案實際指向哪個資源。
+
+類別 ANY 中的 io 查詢回傳一個 STD_FILES 型別的物件讓我們得以操作標準輸出入
+檔案。STD_FILES 有許多特徵，以下的程式會用到的重要特徵包含：
+
+```
+end_of_file: BOOLEAN
+	-- standard_input 在上一次讀取時是否已到達檔案結尾
+read_character
+	-- 從 standard_input 讀入下一個字元並讓它可透過 last_character 取得。
+	-- 若沒有讀取到任何字元，令 end_of_file 為真。
+	require
+		not end_of_file
+	...
+last_character: character
+	-- 字元，在 read_character 被呼叫時讀取的字元
+
+put_character (c: CHARACTER)
+	-- 寫入字元 'c' 到預設輸出的結尾後
+
+注意：EiffelStudio 的 STD_FILES 型別不支援 end_of_file。需使用
+io.input.end_of_file。
+```
+
+上面只是複製核心函式庫文件 std_files.e 中的一部分。通常 Eiffel 的特徵都帶有
+一小段標頭說明，描述特徵的用途與回傳值。
+
+以上所述的四個特徵呈現出一般查詢與命令的分別。read_character 是一個命令，它
+嘗試從 standard_input 讀取一個字元並讓 last_character 查詢可取得這個字元，或
+是在狀況成立時令 end_of_file 為真，表示 standard_input 中沒有沒有更多的字元。
+put_character 寫出一個字元到 default_output，預設為 standard_output。
+
+對 put_character, put_string 等的呼叫可以交錯進行；輸出會依照呼叫的順序呈現。
+
+命令 read_character 有一個前條件(precondiction) (譯：斷言(assertion)的一種)
+
+```
+	require not end_of_file
+```
+
+意即當上一次讀取輸入串流時遇到了檔案結尾，就不允許呼叫 read_character。
+
+可透過 ace-file 來設定斷言的監控，例如
+
+```
+	root
+		...
+	default
+		assertions(all)
+  	cluster
+		...
+	end
+```
+
+所有斷言，像是前條件都會在執行期被監控，這對程式的除錯是極佳的輔助。一旦程式
+進入成熟並經過完整測試，我們可以改變監控模式為```assertion(no)```而不須更動
+任何程式碼。
+
+前條件乃條約式設計(Design by Contract)的一部分，這種設計在 Eiffel 中被廣放的
+運用。一個特徵的前條件，建立了客戶端與供給端的一部分條約，並賦予客戶端一項義
+務。
+
+- 客戶端義務：只有在前條件成立時才呼叫一個特徵。
+
+條約的另一部分，特過制定後條件(postcondition) 來賦予供給端責任。條約式設計
+中，斷言可區分為前條件、後條件、類別不變性(class invariants)、迴圈不變性、
+與檢定(checks)。相關資訊在之後的條約式設計章節會提及。
 
 ## 檔案複製
 
+僅給予字元輸出入功能時，就能撰寫許多有用的程式。第一個程式是將所有的字元
+從輸入複製到輸出。
+
+```
+class
+	COPY
+create
+	make
+feature
+	make
+		do
+			from
+				io.read_character
+			until
+				io.end_of_file
+			loop
+				io.put_character (io.last_character )
+				io.read_character
+			end
+		end
+end
+```
+
+程式碼說明了程式的用意：在迴圈中我們嘗試從輸入串流讀取第一個字元，終止條件
+io.end_of_file 檢查是否到達輸入串流的結尾。只要結尾還未到達，剛剛讀取的字元
+會以 io.pu_character(io.last_character) 寫入到輸出串流。
+
+這個終止條件保證我們能滿足 read_character 的前條件，也就是不會超過串流結尾後
+仍進行讀取。
+
 ## 字數計算
+
+稍稍修改檔案複製程式可以讓我們計算輸入串流中的字元數目。
+
+```
+class 
+	CHAR_COUNT
+create
+	make
+feature
+	make
+		local
+			nc: INTEGER -- 字元數目
+		do
+			from
+				io.read_character
+			until
+				io.end_of_file
+			loop
+				nc := nc + 1
+				io.read_character
+			end
+
+			io.put_string ("number of characters: ")
+			io.put_integer (nc)
+			io.put_new_line
+		end
+end
+```
+
+相對於將讀取到的字元寫入到輸出串流，我們遞增 nc 這個計數器，最後輸出讀取到的
+字元數目。
+
+Eiffel 裡面，大部分的型別有合理的預設值。所有 INTEGER 型態的變數會被初始化為
+0 。因此並不需要明確初始化 nc 。
+
+與 C 不同，Eiffel 並沒有遞增運算元(++)，你必須寫成```nc := nc + 1 ```以遞增
+ nc 。
 
 # 陣列與物件
 
