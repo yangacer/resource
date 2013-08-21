@@ -149,7 +149,8 @@ io.put_string ("Hello, world")
 io.put_new_line
 ```
 
-果想要依照程式碼中的格式輸出含有多個換行的字串，可以使用 verbatim 字串，例如
+果想要依照程式碼中的格式輸出含有多個換行的字串，可以使用逐字(verbatim)字串，
+例如
 
 ```
 io.put_string ("[
@@ -164,9 +165,9 @@ io.put_string ("[
 
 會完全依照程式碼中字串的格式做輸出(譯：保留所有空白字元)。
 
-將多行 vertatim 字串擺在 "[" 與 "]" 之間會移除每一行的"最長相同前綴空白字元
+將多行逐字字串擺在 "[" 與 "]" 之間會移除每一行的"最長相同前綴空白字元
 (longest common whitespace prefix)" (即向左對齊)。若擺在 "{" 與 "}" 間則會直接
-複製所有字串而不移除任何前綴。Verbatim 字串常數與此文件語法和許多 UNIX shell 
+複製所有字串而不移除任何前綴。逐字字串常數與此文件語法和許多 UNIX shell 
 類似。
 
 若想在原碼中的字串換行但不希望換行包含在字串時，可使用包裝字串。陳述式
@@ -431,6 +432,152 @@ Eiffel 裡面，大部分的型別有合理的預設值。所有 INTEGER 型態�
 
 # 陣列與物件
 
+為了展示陣列與物件的用途，我們來寫個統計數字、空白字元與其他字元出現次數的
+程式。
+
+輸入字元可區分為 12 個種類，為了儲存不同數字的出現次數，我們使用一個整數陣列
+而非使用個別的變數。
+
+```
+class COUNT_DIGITS create make feature
+	make
+		local
+			ndigit:		ARRAY[INTEGER]
+			nwhite, nother:	INTEGER
+			c:		CHARACTER
+			i:		INTEGER
+		do
+			create ndigit.make_filled(0, ('0').code, ('9').code)
+				-- create array object
+			from io.read_character until io.end_of_file loop
+				c := io.last_character
+				if '0' <= c and c <= '9' then
+					i := c.code
+					ndigit[i] := ndigit[i] + 1
+				elseif c = ' ' or c = '%N' or c= '%T' then
+					nwhite := nwhite + 1
+				else
+					nother := nother + 1
+				end
+				io.read_character
+			end
+
+			io.put_string ("digits = ")
+			from i := ('0').code until i > ('9').code loop
+				io.put_character(' ')
+				io.put_integer	(ndight[i])
+				i := i + 1
+			end
+			io.put_string(", white space = ");
+			io.put_integer( nwhite )
+			io.put_string(", other = ");
+			io.put_integer( nother )
+			io.put_new_line
+		end
+end
+```
+
+如果將以上程式碼當作輸入文字，程式輸出類似
+
+```
+	digits =  5 5 0 0 0 0 0 0 0 2, white space = 298, other = 58
+```
+
+宣告式```ndigit: ARRAY[INTEGER]```宣告 ndigit 是一個整數陣列，Eiffel 裡陣列
+大小是在執行期指定而非編譯期。陳述式
+
+```
+	create ndigit.make_filled(0, ('0').code, ('9').code)
+```
+
+建立一個陣列物件，其下界索引 (lower index) 為字元 '0' 的編碼值，上界索引
+為字元 '9' 的編碼值，即一個大小為 10 的陣列，且每個陣列元素的值為 0 。
+相對與解釋 ARRAY 的特徵，我們來看看 array.e 中是怎麼定義 ARRAY 的。
+
+```
+class ARRAY[G] ... create make ... feature ...
+
+	make_filled (value:G; l,u: INTEGER)
+		-- 建立一個下界為小寫 L ，上界為 `u' 的陣列
+		-- 並以 `value' 填滿之。
+		-- 若 u < l 則陣列為空。
+
+	lower: INTEGER
+		-- 陣列索引下界
+ 
+	upper: INTEGER
+		-- 陣列索引上界
+ 
+	count: INTEGER
+		-- 元素個數
+ 
+	item alias "[]" (i: INTEGER): G
+		-- 第 i 個陣列元素
+		require
+			 lower <= i
+						 i     <= upper
+		...
+		end
+ 
+	put (v: G; i: INTEGER)
+		-- 將 `v' 放到陣列的第 `i' 個位置
+		require
+			 lower <= i and i <= upper
+		...
+		end
+end
+```
+
+這樣一來程式中與陣列相關的陳述式代表甚麼意思，應該就很清楚了。
+ARRAY 類別是一個泛型 (generic) 類別，使用了泛型參數 G。 我們可套用任何型別到
+G ，來宣告一個陣列。以下是合法的陣列宣告
+
+```
+a1: ARRAY[CHARACTER]
+a2: ARRAY[INTEGER]
+a3: ARRAY[ARRAY[INTEGER]]
+```
+
+a3 宣告了一個陣列的陣列，然而
+
+``` 
+a1: ARRAY[ARRAY] 
+```
+
+是不合法的。現在我們可以理解類別與型別的差異，(譯：牽涉到泛型時)ARRAY 是一個
+類別，而 ARRAY[INTEGER] 是一個型別。對於非泛型類別來說，類別名稱同時代表一
+個類別與型別。
+
+item 這個特徵宣告時同時指定了別名 "[]"。這表示除了可以寫```ndigit.item(i)```
+也可以使用```ndigit[i]```。
+
+別名機制在基礎型別像是 INTEGER 也被使用。例如在 INTEGER 類別的原始碼中可以看
+到類似宣告
+
+```
+plus alias "+" (other: INTEGER) : INTEGER
+```
+
+意即運算式```a + b```其實等同```a.plus(b)```也就是以 b 為參數，呼叫 a 物件的
+特徵 plus (在 Eiffel 或稱為 target a) 。
+
+回到數字統計程式。程式中的迴圈一次讀取一個字元，它必須決定一個字元是數字、空
+白字元或者其他。作法上需要使用條件式，通常形式為：
+
+```
+if condiftion_1 then
+	compound_1
+elseif condition_2 then	-- 零或更多 elseif 
+	compound_2
+else		--可有可無
+	compound
+end
+
+注意：因為不須括號(譯：與 C 相較)，elseif 關鍵字不含任何空白！
+```
+
+
+
 # 函式
 
 # 更專注於類別
@@ -452,6 +599,7 @@ Eiffel 裡面，大部分的型別有合理的預設值。所有 INTEGER 型態�
 程序 procedure
 特徵 feature
 叢集 cluster
+逐字字串 verbatime string
 逸出序列 escaped sequence
 屬性 attribute
 ```
