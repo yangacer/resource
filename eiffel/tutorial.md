@@ -23,15 +23,15 @@ C, C++, 或 java 的基礎能力。
 
 ```
 class
-	HELLO
+    HELLO
 create 
-	make
+    make
 feature
-	make
-		do
-			io.put_string("Hello, world")
-			io.put_new_line
-		end
+    make
+        do
+            io.put_string("Hello, world")
+            io.put_new_line
+        end
 end
 ```
 
@@ -46,10 +46,10 @@ end
 
 ```
 root
-	HELLO.make
+    HELLO.make
 cluster
-	"./"
-	"`path_to_tecomp_installation'/library/kernel"
+    "./"
+    "`path_to_tecomp_installation'/library/kernel"
 end
 ```
 
@@ -57,13 +57,13 @@ end
 鍵入以下命令來編譯與執行該程式
 
 ```
-	tecomp hello.ace
+    tecomp hello.ace
 ```
 
 然後它會印出
 
 ```
-	Hello, world
+    Hello, world
 ```
 
 接著來解釋一下這個程式。一個 Eiffel 程式由任意數量的類別組成。其中一個類別必須
@@ -89,11 +89,11 @@ Eiffel 與許多現代語言相同，使用自由格式─程式語法中的空�
 
 ```
 class
-	HELLO	-- 類別名稱
+    HELLO   -- 類別名稱
 create
-	make	-- 建構程序
+    make    -- 建構程序
 feature
-	...	-- 類別特徵
+    ... -- 類別特徵
 end
 ```
 
@@ -109,10 +109,10 @@ make 的程式碼
 
 ```
 make
-	do
-		io.put_string("Hello, world")
-		io.put_new_line
-	end
+    do
+        io.put_string("Hello, world")
+        io.put_new_line
+    end
 ```
 
 只有兩個陳述式，```io.put_string("Hello, world")``` 呼叫 io 這個特徵；所有
@@ -154,13 +154,13 @@ io.put_new_line
 
 ```
 io.put_string ("[
-  	usage: tecomp options ace_file
+    usage: tecomp options ace_file
  
-		options
-			-t{p,v,e}{0,1,2,3}	trace parsing, validation,
-						execution with level 0,1,2,3
-			-ws{0,1,2,3}		write statistics
-  		 ]")
+        options
+            -t{p,v,e}{0,1,2,3}  trace parsing, validation,
+                        execution with level 0,1,2,3
+            -ws{0,1,2,3}        write statistics
+         ]")
 ```
 
 會完全依照程式碼中字串的格式做輸出(譯：保留所有空白字元)。
@@ -174,7 +174,7 @@ io.put_string ("[
 
 ```
 io_put_string ("Hello, %
-		%world")
+        %world")
 ```
 
 與下面有相同輸出。
@@ -189,10 +189,10 @@ ANY 類別還有另一個特徵 print 用來將任何物件輸出到標準輸出
 
 ```
 class HELLO create make feature
-	make 
-		do
-			print("Hello, world%N")
-		end
+    make 
+        do
+            print("Hello, world%N")
+        end
 end
 ```
 
@@ -207,50 +207,50 @@ degree Celsius = (5/9)( degree Fahrenheit - 32 )
 印出以下的華氏攝氏溫度對照表：
 
 ```
-	0       -17
-	20      -6
-	40      4
-	60      15
-	80      26
-	100     37
-	120     48
-	140     60
-	160     71
-	180     82
-	200     93
-	220     104
-	240     115
-	260     126
-	280     137
-	300     148
+    0       -17
+    20      -6
+    40      4
+    60      15
+    80      26
+    100     37
+    120     48
+    140     60
+    160     71
+    180     82
+    200     93
+    220     104
+    240     115
+    260     126
+    280     137
+    300     148
 ```
 
 此表可以下面的 Eiffel 程式輸出
 
 ```
 class
-	FAHR_CELSIUS 
-		-- 印出華氏-攝氏對照表
+    FAHR_CELSIUS 
+        -- 印出華氏-攝氏對照表
 create
-	make
+    make
 feature
-	make
-		local
-			fahr: INTEGER -- 華氏溫度
-		do
-			from
-				fahr := 0
-			until
-				fahr > 300
-			loop
-				io.put_character('%T')
-				io.put_integer	(fahr)
-				io.put_character('%T')
-				io.put_integer  ((fahr-32) * 5 // 9)
-				io.put_new_line
-				fahr := fahr + 20
-			end
-		end
+    make
+        local
+            fahr: INTEGER -- 華氏溫度
+        do
+            from
+                fahr := 0
+            until
+                fahr > 300
+            loop
+                io.put_character('%T')
+                io.put_integer  (fahr)
+                io.put_character('%T')
+                io.put_integer  ((fahr-32) * 5 // 9)
+                io.put_new_line
+                fahr := fahr + 20
+            end
+        end
 end
 ```
 
@@ -298,18 +298,18 @@ standard_input, standard_output, 與 standard_error。
 
 ```
 end_of_file: BOOLEAN
-	-- standard_input 在上一次讀取時是否已到達檔案結尾
+    -- standard_input 在上一次讀取時是否已到達檔案結尾
 read_character
-	-- 從 standard_input 讀入下一個字元並讓它可透過 last_character 取得。
-	-- 若沒有讀取到任何字元，令 end_of_file 為真。
-	require
-		not end_of_file
-	...
+    -- 從 standard_input 讀入下一個字元並讓它可透過 last_character 取得。
+    -- 若沒有讀取到任何字元，令 end_of_file 為真。
+    require
+        not end_of_file
+    ...
 last_character: character
-	-- 字元，在 read_character 被呼叫時讀取的字元
+    -- 字元，在 read_character 被呼叫時讀取的字元
 
 put_character (c: CHARACTER)
-	-- 寫入字元 'c' 到預設輸出的結尾後
+    -- 寫入字元 'c' 到預設輸出的結尾後
 
 注意：EiffelStudio 的 STD_FILES 型別不支援 end_of_file。需使用
 io.input.end_of_file。
@@ -328,7 +328,7 @@ put_character 寫出一個字元到 default_output，預設為 standard_output�
 命令 read_character 有一個前條件(precondiction) (譯：斷言(assertion)的一種)
 
 ```
-	require not end_of_file
+    require not end_of_file
 ```
 
 意即當上一次讀取輸入串流時遇到了檔案結尾，就不允許呼叫 read_character。
@@ -336,13 +336,13 @@ put_character 寫出一個字元到 default_output，預設為 standard_output�
 可透過 ace-file 來設定斷言的監控，例如
 
 ```
-	root
-		...
-	default
-		assertions(all)
-  	cluster
-		...
-	end
+    root
+        ...
+    default
+        assertions(all)
+    cluster
+        ...
+    end
 ```
 
 所有斷言，像是前條件都會在執行期被監控，這對程式的除錯是極佳的輔助。一旦程式
@@ -366,21 +366,21 @@ put_character 寫出一個字元到 default_output，預設為 standard_output�
 
 ```
 class
-	COPY
+    COPY
 create
-	make
+    make
 feature
-	make
-		do
-			from
-				io.read_character
-			until
-				io.end_of_file
-			loop
-				io.put_character (io.last_character )
-				io.read_character
-			end
-		end
+    make
+        do
+            from
+                io.read_character
+            until
+                io.end_of_file
+            loop
+                io.put_character (io.last_character )
+                io.read_character
+            end
+        end
 end
 ```
 
@@ -397,27 +397,27 @@ io.end_of_file 檢查是否到達輸入串流的結尾。只要結尾還未到�
 
 ```
 class 
-	CHAR_COUNT
+    CHAR_COUNT
 create
-	make
+    make
 feature
-	make
-		local
-			nc: INTEGER -- 字元數目
-		do
-			from
-				io.read_character
-			until
-				io.end_of_file
-			loop
-				nc := nc + 1
-				io.read_character
-			end
+    make
+        local
+            nc: INTEGER -- 字元數目
+        do
+            from
+                io.read_character
+            until
+                io.end_of_file
+            loop
+                nc := nc + 1
+                io.read_character
+            end
 
-			io.put_string ("number of characters: ")
-			io.put_integer (nc)
-			io.put_new_line
-		end
+            io.put_string ("number of characters: ")
+            io.put_integer (nc)
+            io.put_new_line
+        end
 end
 ```
 
@@ -440,54 +440,54 @@ Eiffel 裡面，大部分的型別有合理的預設值。所有 INTEGER 型態�
 
 ```
 class COUNT_DIGITS create make feature
-	make
-		local
-			ndigit:		ARRAY[INTEGER]
-			nwhite, nother:	INTEGER
-			c:		CHARACTER
-			i:		INTEGER
-		do
-			create ndigit.make_filled(0, ('0').code, ('9').code)
-				-- create array object
-			from io.read_character until io.end_of_file loop
-				c := io.last_character
-				if '0' <= c and c <= '9' then
-					i := c.code
-					ndigit[i] := ndigit[i] + 1
-				elseif c = ' ' or c = '%N' or c= '%T' then
-					nwhite := nwhite + 1
-				else
-					nother := nother + 1
-				end
-				io.read_character
-			end
+    make
+        local
+            ndigit:     ARRAY[INTEGER]
+            nwhite, nother: INTEGER
+            c:      CHARACTER
+            i:      INTEGER
+        do
+            create ndigit.make_filled(0, ('0').code, ('9').code)
+                -- create array object
+            from io.read_character until io.end_of_file loop
+                c := io.last_character
+                if '0' <= c and c <= '9' then
+                    i := c.code
+                    ndigit[i] := ndigit[i] + 1
+                elseif c = ' ' or c = '%N' or c= '%T' then
+                    nwhite := nwhite + 1
+                else
+                    nother := nother + 1
+                end
+                io.read_character
+            end
 
-			io.put_string ("digits = ")
-			from i := ('0').code until i > ('9').code loop
-				io.put_character(' ')
-				io.put_integer	(ndight[i])
-				i := i + 1
-			end
-			io.put_string(", white space = ");
-			io.put_integer( nwhite )
-			io.put_string(", other = ");
-			io.put_integer( nother )
-			io.put_new_line
-		end
+            io.put_string ("digits = ")
+            from i := ('0').code until i > ('9').code loop
+                io.put_character(' ')
+                io.put_integer  (ndight[i])
+                i := i + 1
+            end
+            io.put_string(", white space = ");
+            io.put_integer( nwhite )
+            io.put_string(", other = ");
+            io.put_integer( nother )
+            io.put_new_line
+        end
 end
 ```
 
 如果將以上程式碼當作輸入文字，程式輸出類似
 
 ```
-	digits =  5 5 0 0 0 0 0 0 0 2, white space = 298, other = 58
+    digits =  5 5 0 0 0 0 0 0 0 2, white space = 298, other = 58
 ```
 
 宣告式```ndigit: ARRAY[INTEGER]```宣告 ndigit 是一個整數陣列，Eiffel 裡陣列
 大小是在執行期指定而非編譯期。陳述式
 
 ```
-	create ndigit.make_filled(0, ('0').code, ('9').code)
+    create ndigit.make_filled(0, ('0').code, ('9').code)
 ```
 
 建立一個陣列物件，其下界索引 (lower index) 為字元 '0' 的編碼值，上界索引
@@ -497,34 +497,34 @@ end
 ```
 class ARRAY[G] ... create make ... feature ...
 
-	make_filled (value:G; l,u: INTEGER)
-		-- 建立一個下界為小寫 L ，上界為 `u' 的陣列
-		-- 並以 `value' 填滿之。
-		-- 若 u < l 則陣列為空。
+    make_filled (value:G; l,u: INTEGER)
+        -- 建立一個下界為小寫 L ，上界為 `u' 的陣列
+        -- 並以 `value' 填滿之。
+        -- 若 u < l 則陣列為空。
 
-	lower: INTEGER
-		-- 陣列索引下界
+    lower: INTEGER
+        -- 陣列索引下界
  
-	upper: INTEGER
-		-- 陣列索引上界
+    upper: INTEGER
+        -- 陣列索引上界
  
-	count: INTEGER
-		-- 元素個數
+    count: INTEGER
+        -- 元素個數
  
-	item alias "[]" (i: INTEGER): G
-		-- 第 i 個陣列元素
-		require
-			 lower <= i
-						 i     <= upper
-		...
-		end
+    item alias "[]" (i: INTEGER): G
+        -- 第 i 個陣列元素
+        require
+             lower <= i
+                         i     <= upper
+        ...
+        end
  
-	put (v: G; i: INTEGER)
-		-- 將 `v' 放到陣列的第 `i' 個位置
-		require
-			 lower <= i and i <= upper
-		...
-		end
+    put (v: G; i: INTEGER)
+        -- 將 `v' 放到陣列的第 `i' 個位置
+        require
+             lower <= i and i <= upper
+        ...
+        end
 end
 ```
 
@@ -566,11 +566,11 @@ plus alias "+" (other: INTEGER) : INTEGER
 
 ```
 if condiftion_1 then
-	compound_1
-elseif condition_2 then	-- 零或更多 elseif 
-	compound_2
-else		--可有可無
-	compound
+    compound_1
+elseif condition_2 then -- 零或更多 elseif 
+    compound_2
+else        --可有可無
+    compound
 end
 
 注意：因為不須括號(譯：與 C 相較)，elseif 關鍵字不含任何空白！
@@ -607,10 +607,10 @@ CHARACTER 類別含有一個 code 查詢可回傳對應的字元編碼，條件
 
 ```
 class COUNTER_OBJECT feature
-	value: INTEGER
-	increment do value := value + 1 end
+    value: INTEGER
+    increment do value := value + 1 end
 invariant
-	value >= 0
+    value >= 0
 end
 ```
 
@@ -634,7 +634,7 @@ expanded class INTEGER ... end
 
 ```
 invariant
-	value >= 0
+    value >= 0
 ```
 
 類別不變性可以宣告在類別的最後面 (最後一個特徵區塊後) 。它是一種恆常性條件，
@@ -648,23 +648,23 @@ invariant
 
 ```
 class COUNT_DIGIT2 create make feature {NONE}
-	white_counter, other_counter: COUNTER_OBJECT
-	char_counter:		ARRAY[COUNTER_OBJECT]
+    white_counter, other_counter: COUNTER_OBJECT
+    char_counter:       ARRAY[COUNTER_OBJECT]
 
-	make
-		do
-			initialize
-			read_input
-			write_statistics
-		end
-	iniialize
-		...
+    make
+        do
+            initialize
+            read_input
+            write_statistics
+        end
+    iniialize
+        ...
 
-	read_input
-		...
+    read_input
+        ...
 
-	write_statistics
-		...
+    write_statistics
+        ...
 end
 ```
 
@@ -681,25 +681,25 @@ initialize 的程式碼如下：
 
 ```
 initialize
-	local
-		co: COUNTER_OBJECT
-		i: INTEGER
-	do
-		create white_counter; create other_counter
-		create char_counter.make_filled(other_counter, 0, 255)
+    local
+        co: COUNTER_OBJECT
+        i: INTEGER
+    do
+        create white_counter; create other_counter
+        create char_counter.make_filled(other_counter, 0, 255)
 
-		from i:= ('0').code until i = ('9').code + 1 loop
-			create co
-			char_counter[i] := co
-			i := i + 1
-		end
+        from i:= ('0').code until i = ('9').code + 1 loop
+            create co
+            char_counter[i] := co
+            i := i + 1
+        end
 
-		char_counter[('%N').code] := white_counter
-		char_counter[('%T').code] := white_counter
-		char_counter[(' ').code] := white_counter
-	ensure
-		char_counter.count = 256
-	end
+        char_counter[('%N').code] := white_counter
+        char_counter[('%T').code] := white_counter
+        char_counter[(' ').code] := white_counter
+    ensure
+        char_counter.count = 256
+    end
 ```
 
 譯：digital_counter 不見了？為何是區域變數？
@@ -881,7 +881,112 @@ factorial_iterative ( n: INTEGER) : INTEGER
 
 # 更專注於類別
 
+現在為止，我們只建立過根類別以及使用核心函式庫的一些類別、專注於演算法角度
+撰寫一些如迴圈的控制結構。然而 Eiffel 真正的威力在於他能用來製作各式的類別
+與結合這些類別。
+
+這個章節的範例將展示不同的類別用法；第一個演示繼承的一些使用方式，第二個則是
+泛型示範，第三個則用類別來呈現複數。
+
 ## 一個矩形是一種形狀
+
+在圖形世界裡我們會處理圖形物件，像是矩形、圓形等。我們稱這些圖形物件為形狀。
+
+形狀有一些共通點，可以被移動、顯示、疊在其他形狀之上。如果我們每次使用形狀時
+都要先區分他是矩形或圓形，程式碼會變得十分雜亂。
+
+Eiffel 允許使用者定義 SHAPE 抽象類別，擁有一些共通特徵但不真正實作這些特徵。
+更加明確的類別像是 RETANGLE 則繼承 SHAPE 並實作抽象類別裡的特徵。
+
+為了範例的簡潔性，我們為 SHAPE 定義四個抽象特徵與一個具體特徵如下。
+
+```
+deferred class SHAPE feature
+  x_left:   INTEGER deferred end
+  x_right:  INTEGER deferred end
+  y_lower:  INTEGER deferred end
+  y_upper:  INTEGER deferred end
+  write_dimensions do ... end
+invariant
+  x_left <= x_right
+  y_lower <= y_upper
+end
+```
+
+四個抽象特徵讓形狀在 x, y 軸上可自由延伸，它們並沒有實作，往常的 ```do..end```
+區塊被 ```deferred end``` 取代了。特徵的實作被延後到繼承了 SHAPE 的類別裡。
+
+這四個特徵被稱為延遲特徵(deferred feature)。
+
+SHAPE 類別不能用來建立物件 (譯：抽象類別無法實體化) ，因為這樣的物件有未定義
+的特徵。一個有延遲特徵的類別本身也會被延遲。因此我們必須寫成 ```deferred class SHAPE```
+而不僅僅是 ```class SHAPE``` 。擁有延遲特徵的類別必須標註 deffered 是語言定
+義的規則。
+
+你可能覺得編譯器已經知道特徵被延遲，不需要多加一個標註到類別名稱前，但是語言
+這樣規定是為了清楚表明一個類別是抽象的。
+
+同時注意一下，SHAPE 類別沒有任何建立程序，因為對不能有實體物件的抽象類別，建
+立程序是沒有意義的。
+
+雖然該類別只宣告了四個抽象特徵，但是有一些不變性已經可以確立了。謹記類別不
+變性是一種類別特徵的恆常性關係。
+
+SHAPE 類別將這個恆常性需求，套用至所有的衍生類別。意即每個衍生類別都得滿足這
+個類別不變性。此外，所有衍生 (譯：類別裡的) 的特徵也繼承了同樣的類別不變性。
+
+類別不變性是一種斷言，可在執行期監控。在建立類別與使用公開特徵的前後，類別不
+變性都必須被滿足。這可以強力保證任何常式的修改不會違反這個變性。
+
+有了四個抽象特徵 x_left, xright, y_lower, y_upper 後，我們得以撰寫 
+write_dimensions 程序將形狀的 x, y 軸資訊寫入到標準輸出。write_dimensions
+實作如下
+
+```
+write_dimensions
+  do
+    io.put_string ("shape with dimensions x = ")
+    io.put_integer(x_left)
+    io.put_string ("..")
+    io.put_integer(x_right)
+    io.put_string (" and y = ")
+    io.put_integer(y_lower)
+    io.put_string ("..")
+    io.put_integer(x_upper)
+    io.put_new_line
+  end
+```
+
+如你所見，即使是延遲特徵也能被 write_dimensions 使用。這個 SHAPE 類別有時可稱
+做局部實作 (partial implementation) 。他實做了 write_dimensions 但是將延遲特
+徵的實作延後到衍生類別裡。
+
+現在來定義一種形狀，矩形。矩形可以直接以左右上下的維度直接定義
+
+```
+class 
+  RECTANGLE
+inherit
+  SHAPE
+create
+  make
+feature
+  x_left:   INTEGER
+  x_right:  INTEGER
+  y_lower:  INTEGER
+  y_upper:  INTEGER
+feature {NONE}
+  make(x1, y1, x2, y2: INTEGER)
+    -- 建立一個以 (x1, y1) 為左下角，(x2, y2) 為右上角的矩形
+    require
+      x1 <= x2
+      y1 <= y2
+    do
+      x_left  := x1;  x_right := x2
+      y_lower := y1;  y_upper := y2
+    end
+end
+```
 
 ## 矩陣物件
 
