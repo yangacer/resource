@@ -77,7 +77,7 @@ ace-file 定義了兩個叢集─ "./" (即當前目錄) 與 "`path_to_tecomp_in
 
 執行一個 Eiffel 程式從建立一個根型別的物件並呼叫其根程序開始 (此處型別與類別兩詞
 為同義，它們只有在使用泛型時不同)。該跟程序可以創建任意數量的各種物件並呼叫任何已
-建立物件的函式。
+建立物件的常式。
 
 Eiffel 與許多現代語言相同，使用自由格式─程式語法中的空白字元是不重要的。退格
 是為了人眼的可讀性而非編譯器限制。
@@ -100,9 +100,9 @@ end
 這個框架表示一個 HELLO 類別的定義。型別為 HELLO 的物件只能以 make 建構程序建立。
 所以特徵宣告在 feature...end 區塊。
 
-一個特徵可以是函式或屬性。我們的簡單程式只有一個特徵稱為 make。該特徵為函式，
-一個函式可以接受參數並回傳結果。沒有回傳結果的函式稱為命令 (command) 或程序
-反之稱為查詢 (query)。make 這個函式為 HELLO 的建構程序是因為他被列在建構程序
+一個特徵可以是常式或屬性。我們的簡單程式只有一個特徵稱為 make。該特徵為常式，
+一個常式可以接受參數並回傳結果。沒有回傳結果的常式稱為命令 (command) 或程序
+反之稱為查詢 (query)。make 這個常式為 HELLO 的建構程序是因為他被列在建構程序
 的集合中(在 HELLO 中它是唯一一個)。
 
 make 的程式碼
@@ -256,7 +256,7 @@ end
 
 任何在 '--' 與行尾間的字元都會被編譯器忽略，這些字元可作為註解。
 
-Eiffel 中，區域變數可在各個函式中的 do end 區塊前宣告。上面的程式中，區域變數
+Eiffel 中，區域變數可在各個常式中的 do end 區塊前宣告。上面的程式中，區域變數
 fahr 宣告為 INTEGER 型別；Eiffel 是強型別語言，因此任何變數，運算式等都必須
 對應一個型別。 在 Eiffel 裡，一個 INTEGER 是介於 -2^31 至 2^31 - 1 之間的數值
 ，意即 INTEGER 至少有 32 位元。
@@ -759,8 +759,125 @@ write_statistics
 
 TODO These 3 routine obviouly won't get compiled.
 
-
 # 函式
+
+目前我們僅止於撰寫程序；記得，泛用的名稱為常式。從使用者角度來看，常式一類是
+命令，另一類是查詢 (有傳回值的特徵) ，查詢能實作為屬性或函式。
+
+現在來寫個計算階乘數的函式，還記得數學定義是
+
+```
+n! = 1,           if n = 0
+n! = n * (n-1)!,  if n > 0
+```
+
+Eiffel 裡可以撰寫遞迴函式，既然數學上以遞迴定義，以遞迴函式實作十分簡單
+
+```
+fac (n: INTEGER): INTEGER
+  require
+    n >= 0
+  do
+    if n = 0 then
+      Result := 1
+    else
+      Result := n * fac(n - 1)
+    end
+  end
+```
+
+所有 Eiffel 函式都隱含一個預先宣告的區域變數 Result ，所以我們不需要額外宣告
+此一變數，編譯器會自動幫你添加。Result 變數的型別取決於函式的傳回值型別，在
+常式中你必須賦值給 Result (或建立 Result) ，Result 的值會被傳回函式的呼叫者。
+
+注意：函式可以有零或多個參數，以下都是合法的函式
+
+```
+five: INTEGER do Result := 5 end
+array_of_10_ints: ARRAY[INTEGER] do create Result.make_filled(0,0,9) end
+```
+
+使用者不需要知道 five 與 array_of_10_ints 是函式，他們可以視為無參數的查詢
+，與屬性沒有分別。這是一致化存取(uniform access) 的原則，實作者可自行定奪
+要以無參數查詢還是屬性實作，都不會影響到客戶端程式碼。
+
+對於不欣賞遞迴函式的人們，我們也寫個迭代版本的 factorial
+
+```
+factorial_iterative (n: INTEGER): INTEGER
+  require
+    n >= 0
+  local 
+    i: INTEGER
+  do
+    from Result:=1; i:=0 until i = n loop
+      i := i + 1
+      Result := i * Result
+    end
+  end
+```
+
+撰寫風格注意事項：Eiffel 並不要求以分號作為陳述句的結尾或分隔，但是它們是被允
+許的，語法上分號都是定義為可有可無的。上面的程式我們可以改用
+```Result:=1 n:=1```而不使用分號。不過多個陳述句擺在同一行時，為了可讀性最好
+還是加上分號。
+
+遞迴版本的函式很容易可以驗證，因為他只是 Eiffel 語法版的數學定義；而驗證迭代
+版本則需要思考一下：迴圈邊界是否正確？迭代次數是否正確？雖然這個迴圈並不複雜
+，我們還是嚴謹一點地以 Eiffel 技巧來驗證一下。
+
+關鍵想法是 Result 總是含有 ```i!``` 。迴圈從 ```Result=1``` 開始，從定義得知
+這是 ```0!``` 的值。也就是說在迴圈初始時 ```Result=i!``` 是被滿足的。每次迭
+代我們遞增 i 並將 ```i*Result``` 賦值給 Result，即```i*(i-1)!```。因此，若
+```Result=i!```在迴圈初始時是合法的，在迴圈結尾時也會是合法的。
+
+我們稱一個在迴圈開始與結束都為真的條件為迴圈不變性 (loop invariant)。
+
+截至目前，我們可以說服自己 ```Result=i!``` 是一個迴圈不變性。
+
+在迴圈結尾時，我們知道終止條件 i=n 為真，因此我們知道在迴圈結束時
+
+```
+i = n and Result = i!
+```
+
+等同
+
+```
+Result = n!
+```
+
+Eiffel 允許我們制訂迴圈不變性。既然我們已經有個可靠的遞迴函式 fac ，我們可以
+完全倚靠 Eiffel 撰寫不變性(譯：a little bit overkill)
+
+```
+factorial_iterative ( n: INTEGER) : INTEGER
+  require n >= 0
+  local   i: INTEGER
+  do
+    from i:=0; Result:=1 invariant
+      0 <= i and i <= n
+      Result = fac(i)
+    until i = n loop
+    loop
+      i       := i + 1
+      Result  := i * Result
+    variant
+      n - i
+    end
+  end
+```
+
+我們增加了直觀的不變性條件聲明 i 在 0 到 n 之間迭代。你可以使用 Eiffel 的斷言
+監控工具來檢查迴圈不變性，方法是在 ace-file 中添加```default assertions(all)```。
+
+在上面的程式我們加入了一個迴圈可變式 (loop variant) 。這是個檢驗無窮迴圈的工
+具，一個可變式是一個非負的整數運算式，他必須在每次迭代時至少減 1 。
+這個可變式是剩下的迭代次數上界。由於 i 從 0 遞增到 n ，剩下的迭代次數為
+```n-i```。
+
+斷言監控模式下，Eiffel 執行期在每次迭代時，會檢驗可變式為非負並至少被減 1 。
+若以上條件為假，同樣會告知可變式被違反。
 
 # 更專注於類別
 
