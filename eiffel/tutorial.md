@@ -961,7 +961,7 @@ write_dimensions
 做局部實作 (partial implementation) 。他實做了 write_dimensions 但是將延遲特
 徵的實作延後到衍生類別裡。
 
-現在來定義一種形狀，矩形。矩形可以直接以左右上下的維度直接定義
+現在來定義一種形狀，矩形。矩形可以直接以左右上下的維度定義
 
 ```
 class 
