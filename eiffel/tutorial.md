@@ -988,6 +988,141 @@ feature {NONE}
 end
 ```
 
+RECTANGLE 繼承延遲類別 SHAPE 並實作其中的延遲特徵。以 Eiffel 的術語來說，重新
+宣告一個延遲特徵並啟用他，稱為啟用特徵 (effecting a feature) 。
+
+RECTANGLE 選擇以屬性來宣告延遲特徵。
+
+由於 RECTANGLE 重新宣告並啟用了所有延遲特徵，這個類別不再是一個延遲類別。
+RETANGLE 類別提供了建立程序 make ，接受左下、右上座標並初始化屬性。
+
+為了滿足父類別 SHAPE 的不變性，建立程序 make 設定了參數的前條件。
+
+藉由在 feature 關鍵字後加上 ```{NONE}``` 的方式，我們讓 make 變成一個私有函式
+，加上我們將他列為建構標頭區塊中 (譯：create ...)，make 就只有在建構過程中能
+被呼叫。建構函式常會以這種方式實作，藉以避免被建構以外的程序呼叫。
+
+不過這並非鐵則，你仍可以開放外部直接呼叫建構函式，但是最好確保在物件的生命週
+期中，任意呼叫建構函式不會造成任何異常。
+
+另一種形狀，圓形，定義成由圓心及半徑構成。因此我們需要 x_center, y_center 及
+radius 屬性。由這些屬性我們可以計算出 x_left, x_right, y_lower 及 y_upper ，
+在 CIRCLE 類別裡，x_left 等並非屬性，而是以查詢實作。
+
+類別 CIRCLE 定義如下
+
+```
+class
+  CIRCLE
+inherit
+  SHAPE
+create
+  make
+feature
+  x_center: INTEGER
+  y_center: INTEGER
+  radius:   INTEGER
+
+  x_left:   INTEGER do Result := x_center - radius end
+  x_right:  INTEGER do Result := x_center + radius end
+  y_lower:  INTEGER do Result := y_center - radius end
+  y_upper:  INTEGER do Result := y_center + radius end
+feature {NONE}
+  make ( x, y: INTEGER; r: INTEGER )
+    -- (圓心、半徑)
+    require
+      r >= 0
+    do
+      x_center  := x
+      y_center  := y
+      radius    := r
+    end
+end
+```
+
+RECTANGLE 與 CIRCLE 類別以不同的技巧啟用父類別裡延遲特徵，兩種方式都是合法的。
+完整的實作，不論是記憶體型的屬性，或計算型的函式，都能延遲到子類別再定義。
+
+有了以上兩個類別，我們就能建立兩種圖形物件。由於兩種類別都繼承了 SHAPE 類別
+，我們能將一個 RECTANGLE 型別的變數，賦值給 SHAPE 型別的變數。我們稱 
+RECTANGLE 遵循 (conforms) SHAPE 。
+
+```
+local
+  s: SHAPE
+  r: RECTANGLE
+  c: CIRCLE
+do
+  create r.make(0, 0, 10, 20)
+  create c.make(5, 5, 30)
+
+  s := r -- OK, RECTANGLE 遵循 SHAPE
+  s.write_dimensions
+
+  s := c -- OK, CIRCLE 遵循 SHAPE
+  s.write_dimensions
+end
+```
+
+範例較為簡單，你也可以宣告一個```ARRAY[SHAPE]```，將兩個不同的圖形物件，放
+到陣列中。
+
+若 SHAPE 定義了一些額外的延遲特徵如下
+
+```
+deferred class SHAPE feature
+  ...
+  move (x, y: INTEGER)
+    -- 將物件向左移動 x，向右移動 y
+    deferred end
+  draw 
+    -- 繪製圖形
+    deferred end
+  wipe_out 
+    -- 清除圖形
+    deffered end
+end
+```
+
+並在子類別裡實作以上延遲特徵，我們就能簡單地撰寫一個移動所有圖形物件的功能
+
+```
+class GRAPHICAL_SYSTEM feature
+  ...
+  objects: ARRAY[SHAPE]
+  move_all (x, y: INTEGER)
+    -- 移動所有物件
+    local
+      i: INTEGER
+    do
+      from i:=objects.lower until i > objects.upper loop
+        objects[i].wipe_out
+        objects[i].move (x, y)
+        objects[i].draw
+        i := i + 1
+      end
+    end
+end
+```
+
+由於 SHAPE 是一個參照類別，每個陣列元素都是參照物件。
+
+```
+                 +----+
+   objects -->   |    |  --> rectangle object
+                 +----+
+                 |    |  --> circle object
+                 +----+
+                 |    |  --> rectangle object
+                 +----+
+                 |    |  --> triangle object
+                 +----+
+                 |    |  -->  ...
+                 +----+
+                 |    |  -->  ...
+                 +----+
+```
+
 ## 矩陣物件
 
 ## 複數
