@@ -1125,6 +1125,266 @@ end
 
 ## 矩陣物件
 
+矩陣是種矩形的數字編排法
+
+```
+       col 1      col 2     col 3
+
+row 1:   1         10         -5
+row 2:  -1          2         -7
+```
+
+上面的矩陣有兩列三行，每個元素為整數值。 ```a[1, 3]``` 則用來定位第 1 列第 3 
+行的元素。
+
+我們以 a.rows 與 a.columns 來取得列與行的總數。
+
+兩個矩陣可以被相加減、互乘。
+
+做矩陣加減法的兩個矩陣必須有相同維度，c = a+b 可根據以下數學式計算
+
+```
+c[i, j] = a[i, j] + b[i, j]
+```
+
+c = a*b 乘法運算的數學式為
+
+```
+c[i, k] = a[i, 1] * b[1, k] + a[i, 2] * b[2, k] + ... a[i,n] * b[n, k]
+
+  where n = a.columns = b.rows
+```
+
+目前為止是矩陣的基本數學性質。
+
+現在來建立一個可以 Eiffel 的 MATRIX 類別，我們並不需要為了不同的元素型別各
+寫一種矩陣類別，在這裡泛型可派上用場，省略細節後的 MATRIX 類別如下
+
+```
+class
+  MATRIX[G->NUMERIC creat default_create end]
+create
+  make
+feature {NONE}
+  make (r, c: INTEGER)
+    -- r 列數, c 行數
+    ...
+    ensure
+      rows = r
+      columns = c
+    end
+feature
+  rows: INTEGER ...
+  columns: INTEGER ...
+
+  is_valid_row (i: INTEGER) : BOOLEAN
+    do Result := 1 <= i and i < rows end
+  is_valid_column (j: INTEGER) : BOOLEAN
+    do Result := 1 <= j and j <= columns end
+  item alias "[]" (i, j: INTEGER) : G
+    -- 在第 i 列第 j 行的元素
+    require
+      is_valid_row (i)
+      is_valid_column (j)
+    ...
+    end
+  put (e1: G; i,j: INTEGER)
+    -- 將元素 e1 放到 [i, j] 位置
+    require
+      is_valid_row (i)
+      is_valid_column (j)
+    ...
+    ensure
+      item (i, j) = el
+    end
+  plus alias "+" (other: like Current): like Current
+    require
+      rows = other.rows
+      columns = other.columns
+    ...
+    end
+  minus alias "-" (other: like Current): like Current
+    require
+      rows = other.rows
+      columns = other.columns
+    ...
+    end
+  product alias "*" (other: like Current): like Current
+    require
+      columns = other.rows
+    ...
+    end
+feature {NONE} -- 實作
+    ...
+end
+```
+
+這個架構裡可以看到數個 Eiffel 的觀念
+
+### 1. 制約式泛型 (Constrained genericity)
+
+```class MATRIX[G->NUMERIC create default_create end]``` 表明 MATRIX 是個
+泛型類別，可以用來定義型別為 ```MATRIX[INTEGER]``` 或 ```MATRIX[REAL]```
+的變數。藉由設定 "G 必須遵循 NUMERIC 型別" 這項制約，我們得以避免 
+```MATRIX[BOOLEAN]``` 被使用。
+
+NUMERIC 是一個核心函式庫中的抽象類別，將加減乘等運算宣告為延遲特徵。類別
+INTEGER 與 REAL 繼承了 NUMERIC (即遵循 NUMERIC) 並實作數值運算元。
+
+進一步我們希望所有 MATRIX 都能自行初始化，藉由 
+```create default_create end```指定泛型 MATRIX 都需具備 default_create 這個
+建構程序。預設建構式的語法為 ```create cp1, cp2, ... end``` 且是可有可無的。
+可用來表明 cp1, cp2 在此泛型類別中必須是建構程序。
+
+### 2. 運算元別名 (Operator aliases)
+
+使用 Eiffel 的別名機制，我們可以寫出 a+b, a-b 與 a+b 。
+
+### 3. 下標別名 (Bracket alias)
+
+```a[i, j]``` 的定址語法相較於 ```a.item(i, j)``` 來說可讀性較高。須注意
+每個類別最多只能有一個下標別名。這裡我們使用在 item 特徵上。
+
+### 4. 錨點型別 (Anchored types)
+
+我們可以定義 plus 特徵為
+
+```
+plus alias "+" (other: MATRIX[G]): MATRIX[G]
+```
+
+但你可以看到我們實際上如此定義
+
+```
+plus alias "+" (other: like Current): like Current
+```
+
+在 MATRIX 類別中 MATRIX[G] 與 like Current 等價，因為目前型別為 MATRIX[G]。
+
+然而當我們定義 ```class SPECIAL_MATRIX inherit MATRIX ... end``` 時，我們希望
+SPECIAL_MATRIX[G] 的運算傳回型別為 SPECIAL_MATRIX[G] 的回傳值。
+
+在 plus 等特徵的參數與回傳值，使用錨點型別即能達到上述的效果。
+```like Current``` 設定一個對應到 **目前型別** 的錨點，在 SPECIAL_MATRIX[G]
+裡，目前型別即 SPECIAL_MATRIX[G] 。
+
+錨點可以設置到 Current 或其他類別的特徵 (必須為查詢) 。
+
+### 5. 條約式設計 (Design by Contract)
+
+與其他範例一樣，前條件與後條件可用來說明允許的、預期的常式行為。
+
+plus, minus 與 product 裡的前條件避免我們對兩個不相容的矩陣做運算。
+
+斷言在 Eiffel 程式設計中佔有非常重要的地位。
+
+第一，它們能夠說明你的意圖，使用者能透過閱讀常式的標頭註解、前條件、後條件
+，對常式的功能有精確的了解，而不需要閱讀實作碼。
+
+第二，它們能輔助程式的除錯。開發中的程式通常會開啟所有種類的斷言監控，若有
+足夠多的斷言，一個錯誤通常能在接近源頭的地方被截取。這能顯著加速除錯。
+
+第三，若一個常式本身必定滿足後條件，需要檢查的只有客戶端的呼叫方式。
+這時斷言是最好的理論根據。
+
+###  
+
+現在我們得找個適合的實作來儲存矩陣的元素。若我們定義
+
+```
+feature {NONE} -- 實作
+  matrix: ARRAY[ARRAY[G]]
+end
+```
+
+我們能以 matrix[i][j] 或 matrix.item(i).item(j) 存取 (i, j) 的矩陣元素。
+
+make 特徵則妥善地初始化矩陣
+
+```
+feature {NONE}
+  make (r, c: INTEGER)
+    local
+      i: INTEGER
+      one_row: ARRAY[G]
+      default_value: G
+    do
+      create matrix.make_empty(r, 1)
+      from i:=1 until i > r loop
+        create one_row.make_filled(default_value, 1, c)
+        matrix.extend_rear(one_row)
+        i := i + 1
+      end
+    ensure
+      rows = r
+      columns = c
+    end
+```
+
+我們使用 matrix 的行列數作為 rows 與 columns 特徵的實作
+
+```
+rows: INTEGER
+  do Result := matrix.upper end
+columns: INTEGER
+  do
+    if rows > 0 then
+      Results := matrix[1].upper
+    end
+  end
+```
+
+元素存取常式 item 與 put
+
+```
+item alias "[]" (i, j: INTEGER): G
+  require
+    is_valid_row (i)
+    is_valid_column (j)
+  do
+    Result := matrix[i][j]
+  end
+put (e1: G; i, j: INTEGER)
+  require
+    is_valid_row (i)
+    is_valid_column (j)
+  do
+    matrix[i][j] := e1
+  ensure
+    item(i, j) = e1
+  end
+```
+
+以下呈現乘法運算的實作，其他則留給讀者做練習
+
+```
+product alias "*" (other: like Current): like Current
+  require
+    columns = other.rows
+  local
+    i,j,k: INTEGER
+  do
+    create Result.make ( rows, other.columns)
+    from i:=1 until i>rows loop
+      from k:=1 until k > other.columns loop
+        from j := 1 until j > columns loop
+          Result[i,k] := Result[i, k] + Current[i, j] * other[j, k]
+          j := j + 1
+        end
+        k := k + 1
+      end
+      i := i + 1
+    end
+  end
+```
+
+### 習題：
+
+- 撰寫 MATRIX 的類別不變性，確保每一列長度相同
+
+- 實作特徵 transporsed 傳回一個旋轉過的矩陣 
+(即 ```a.transposed[i, j] = a[j,  i]``` ) ，並添加後條件驗證 rows 與 columns。
+
 ## 複數
 
 # 連結串列
