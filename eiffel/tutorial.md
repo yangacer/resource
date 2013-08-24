@@ -1086,7 +1086,7 @@ end
 
 並在子類別裡實作以上延遲特徵，我們就能簡單地撰寫一個移動所有圖形物件的功能
 
-```
+```eiffel
 class GRAPHICAL_SYSTEM feature
   ...
   objects: ARRAY[SHAPE]
@@ -1160,7 +1160,7 @@ c[i, k] = a[i, 1] * b[1, k] + a[i, 2] * b[2, k] + ... a[i,n] * b[n, k]
 現在來建立一個可以 Eiffel 的 MATRIX 類別，我們並不需要為了不同的元素型別各
 寫一種矩陣類別，在這裡泛型可派上用場，省略細節後的 MATRIX 類別如下
 
-```
+```eiffel
 class
   MATRIX[G->NUMERIC creat default_create end]
 create
@@ -1249,7 +1249,7 @@ INTEGER 與 REAL 繼承了 NUMERIC (即遵循 NUMERIC) 並實作數值運算元�
 
 我們可以定義 plus 特徵為
 
-```
+```eiffel
 plus alias "+" (other: MATRIX[G]): MATRIX[G]
 ```
 
@@ -1287,11 +1287,10 @@ plus, minus 與 product 裡的前條件避免我們對兩個不相容的矩陣�
 第三，若一個常式本身必定滿足後條件，需要檢查的只有客戶端的呼叫方式。
 這時斷言是最好的理論根據。
 
-###  
 
 現在我們得找個適合的實作來儲存矩陣的元素。若我們定義
 
-```
+```eiffel
 feature {NONE} -- 實作
   matrix: ARRAY[ARRAY[G]]
 end
@@ -1301,7 +1300,7 @@ end
 
 make 特徵則妥善地初始化矩陣
 
-```
+```eiffel
 feature {NONE}
   make (r, c: INTEGER)
     local
@@ -1323,7 +1322,7 @@ feature {NONE}
 
 我們使用 matrix 的行列數作為 rows 與 columns 特徵的實作
 
-```
+```eiffel
 rows: INTEGER
   do Result := matrix.upper end
 columns: INTEGER
@@ -1336,7 +1335,7 @@ columns: INTEGER
 
 元素存取常式 item 與 put
 
-```
+```eiffel
 item alias "[]" (i, j: INTEGER): G
   require
     is_valid_row (i)
@@ -1357,7 +1356,7 @@ put (e1: G; i, j: INTEGER)
 
 以下呈現乘法運算的實作，其他則留給讀者做練習
 
-```
+```eiffel
 product alias "*" (other: like Current): like Current
   require
     columns = other.rows
