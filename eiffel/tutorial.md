@@ -1538,6 +1538,133 @@ MATRIX 泛型，具現化為 MATRIX[COMPLEX] 型別。
   +-------+     +-------+    +-------+             +-------+
 ```
 
+串列含有兩個參照，一個指涉第一節點，另一個則指涉最後結點。
+第一節點內含有一個參照，指涉第二個節點，第二節點也含有參照，
+指涉第三節點，以此類推。
+最後一個節點則含有空參照。
+
+當串列為空，參照到第一與最後節點的參照皆為空參照。
+
+節點為元素的容器，含有一個元素與下一個節點的參照。
+
+移除第一節點的動作很簡單，將原本參照到第一節點的參照，改參照第二節點即可。
+
+現在考慮一下邊界狀況，即空串列與只有一個元素的串列，可圖是如下。
+
+```
+    empty     one element
+  +-------+    +-------+
+  | List  |    | List  |
+  +-|---|-+    +-|---|-+
+    x   x        v   v
+               +-------+
+               |       |
+               +-------+
+```
+
+節點的設計很簡單
+
+```
+class LINKABLE[G] create put feature
+    item: G
+    next: ?like Current
+    put (element: G)
+        do item := element end
+    put_next (n: ?like Current)
+        do next := n end
+end
+```
+
+唯一的新東西是 like Current 前的問號，型別 ?T 稱為可卸除型別 (detachable type)
+Eiffel 裡所有型別預設為 "已附帶 (attached)"，變數、運算式等必須附帶到物件上。
+但以串列來說，我們需要一個可以指涉到 "無" 的型別。可卸除型別即符合這個需求。
+
+若變數 v 的型別為 ?T ，我們可令 ```v:= Void``` 或執行 
+```v /= Void``` 布林運算，測試這個變數是否附帶在一個物件上。
+
+對於已附帶型別的變數，Eiffel 編譯器會驗證他們總是附帶至實體物件，否則會視為
+錯誤。
+
+鏈結骨架的外觀如下
+
+```
+class
+  LINKED_LIST[G]
+feature {NONE}
+  first_linkable: ?LINKABLE[G]
+  last_linkable : ?LINKABLE[G]
+feature
+  is_emptr: BOOLEAN
+    do Result := first_linkable = Void end
+  first: G
+    ...
+  last: G
+    ...
+  extend_front ( element: G )
+    ...
+  extend_rear ( element: G )
+    ...
+  remove_first
+    ...
+invriant
+  (first_linkable = Void) = (last_linkable = Void)
+end
+```
+
+我們的鏈結串列中有兩個參照屬性，分別指涉第一個與最後一個節點。
+它們只能都指涉到 Void 或指涉到 LINKABLE[G] 節點。這一點我們透過類別不變性
+確認。
+
+錯誤的函式 first 實作：
+
+```
+first: G
+  require
+    not is_empty
+  do
+    Result := first_linkable.item
+  end
+```
+
+由於 first_linkable 是可卸除型別，可能為 Void ，因此編譯器不會接受運算式 
+```first_linkable.item``` 。
+
+然而我們已經透過 not is_empty 前跳見確認 first_linkable 不可能是 Void ，因此
+我們希望讓編譯器能認可上面的操作，這時我們必須添加斷言
+
+```
+first: G
+  require
+    not is_empty
+  do
+    check {l:LINKABLE[G]} first_linkable end
+  Result := l.item
+  end 
+```
+
+運算式 ```{x:T} expr``` 是一種物件測試，檢查 expr 是否附帶到一個 T 型別的
+物件上。若結果為真，該物件會被附加到區域變數 x 。
+
+這個變數會再被宣告的區域中存活，以此例而言，l 會存活到常式結束。一個 check 的
+區域變數是唯讀的。
+
+離開了存活區域就無法使用該變數了，如：
+
+```
+...
+if condition then
+  ...
+  check {x:T} expr end
+  ...
+  x.some_feature -- 合法
+  ...
+end
+x.some_feature -- 非法
+...
+```
+
+函式 last 與 first 幾乎相同。
+
 
 
 # 中英對照
@@ -1562,4 +1689,6 @@ MATRIX 泛型，具現化為 MATRIX[COMPLEX] 型別。
 參照 reference
 啟用 effect
 遵循 conform
+已附帶 attached
+可卸除 detachable
 ```
