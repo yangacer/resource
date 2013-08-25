@@ -1386,7 +1386,158 @@ product alias "*" (other: like Current): like Current
 
 ## 複數
 
-# 連結串列
+複數包含兩個實數，用以表示實部與虛部，通常 COMPLEX 類別架構會是
+
+```
+class COMPLEX feature
+  ...
+  real: REAL
+  imag: REAL
+  ...
+end
+```
+
+不過，一般數值型別會使用複製語意，讓變數賦值時進行複製而非參照，因此定義成
+```expanded class COMPLEX``` 較為恰當。
+
+此外，核心函式庫的 NUMERIC ─ 數值類別的基底型別 ─ 其定義了數個數值特徵如下
+
+```
+deferred class NUMERIC feature
+  zero: like Current 
+    -- 加法單元
+    deferred end
+  one : like Current
+    -- 乘法單元
+    deferred end
+  plus alias "+" (other: like Current): like Current
+    deferred end
+  minus alias "-" (other: like Current): like Current
+    deferred end
+  product alias "*" (other: like Current): like Current
+    deferred end
+  divided alias "/" (other: like Current): like Current
+    require
+      good_divisor : divisible (other)
+    deferred end
+  identity alias "+": like Current
+    deferred end
+  negated alias "-": like Current
+    deferred end
+  divisible (other: like Current): BOOLEAN
+    deferred end
+end
+```
+
+如 NUMERIC 這種類別也稱為行為類別 (behaviour class) ，它們定義子類應滿足的
+行為。用戶得以預期所有繼承行為類別的衍生類別，將妥善實作延遲特徵。
+
+實作 COMPLEX 類別這項任務，實際上就是啟用 NUMERIC 裡定義的延遲特徵。
+
+```
+expanded class COMPLEX inherit NUMERIC create
+  make, default_create
+feature {NONE}
+  make (r, i: REAL) do read := r; imag := i end
+feature
+  read: REAL
+  imag: REAL
+  one : like Current do create Result.make(1.,0.) end
+  zero: like Current do end
+
+  puls alias "+" (other: like Current): like Current
+    do
+      create Result.make(real + other.real, imag + other.imag)
+    end
+  minus alias "-" (other: like Current): like Current
+    do
+      create Result.make(real - other.read, imag - other.imag)
+    end
+  product alias "*" (other: like Current): like Current
+    do
+      create Result.make(real * other.real - imag * other.imag,
+                         imag * other.real + read * other.imag)
+    end
+  divided alias "/" (other: like Current): like Current
+    local
+      a, b, c, d: REAL
+      r, i:       REAL
+      n:          REAL
+    do
+      a := real; b:= imag;
+      c := other.real; d := other.imag
+      r := a*c + b*d
+      i := b*c - a*d
+      n := c*c + d*d
+      create Result.make (r/n, i/n)
+    end
+  identity alias "+": like Current
+    do Result := Current end
+  negated alias "-": like Current
+    do create Result.make(-real, -imag) end
+  divisible (other: like Current): BOOLEAN
+    do Result := other /~ zero end
+end
+```
+
+注意，這裡有些確保浮點運算正確性的技巧。由於實數是以 IEEE 浮點數格式儲存，
+所以 0 有分正負，兩個值代表同一數值但在電腦裡是不同的。布林運算式 
+```0. ~ -0.``` 為假。因此，特徵 divisible 在參數 other 含有負零值時，會傳回
+不正確的結果。
+
+正確的實作會將 other 的絕對值與一個極小的實數做比較，這裡我們忽略這個問題。
+
+值得一提的是建構程序包含了 make 與 default_create 。前者用來初始化一個複數，
+後者並未在 COMPLEX 裡定義，它繼承自核心函式庫的 ANY ，不做任何事。
+
+不做任何事的建構式乍看之下令人訝異，然而，一旦了解 COMPLEX 僅有的兩個屬性
+皆為 REAL 型別，且 REAL 可以自我建構 (不明確初始化即初始化為零) 。不做任何
+事就代表實部與虛部會初始化為零。
+
+基於同樣事實，我們可以將特徵 zero 寫成
+
+```
+zero: like Current do end
+```
+
+而不是
+
+```
+zero: like Current do create Result.make(0.,0.) end
+```
+
+未明確初始化的變數 ```var``` 會在第一次被使用前，被系統如下初始化
+
+```
+create var.default_create
+```
+
+但前提是這個變數的型別能自我建構。將 default_create 指定為建構程序之一即代表
+這個意義。
+
+額外的好處是我們的 COMPLEX 類別，遵循了 NUMERIC 類別，因此得以套用到前一章節的
+MATRIX 泛型，具現化為 MATRIX[COMPLEX] 型別。
+
+# 鏈結串列 (Linked lists)
+
+鏈結串列是基礎的資料結構，優點是能快速地在頭尾兩端插入元素，缺點是隨機存取
+元素成本高昂。
+
+資料結構的概念如下
+
+```
+  +-------+
+  | List  |
+  +-|---|-+
+    |   |
+    |   \----------------------------------------------\
+    |                                                  |
+    V                                                  V
+  +-------+     +-------+    +-------+             +-------+
+  | first |---->|       |--->|       |--->.....--->| last  |---X
+  +-------+     +-------+    +-------+             +-------+
+```
+
 
 
 # 中英對照
