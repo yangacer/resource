@@ -1629,8 +1629,8 @@ first: G
 由於 first_linkable 是可卸除型別，可能為 Void ，因此編譯器不會接受運算式 
 ```first_linkable.item``` 。
 
-然而我們已經透過 not is_empty 前跳見確認 first_linkable 不可能是 Void ，因此
-我們希望讓編譯器能認可上面的操作，這時我們必須添加斷言
+然而我們已經透過 not is_empty 前條件確認 first_linkable 不可能是 Void ，因此
+我們希望讓編譯器能認可上面的操作，這時我們必須添加 check 斷言
 
 ```
 first: G
@@ -1665,7 +1665,72 @@ x.some_feature -- 非法
 
 函式 last 與 first 幾乎相同。
 
+插入元素到串列前端的程序不難，我們需建立一個新的節點用來存放新的元素，接著
+將 first_linkable 指涉到原有的第一個節點。另外，這個程序也得考量串列為空的
+狀況，以確保正確性。
 
+```
+extend_front (element: G)
+  local
+    new_cell: LINKABLE[G]
+  do
+    create new_cell.put (element)
+    if is_empty then
+      first_linkable := new_cell
+      last_linkable := new_cell
+    else
+      new_cell.put_next (first_linkable)
+      first_linkable := new_cell
+    end
+  ensure 
+    first = element
+  end
+```
+
+插入新元素到串列結尾我們再次使用物件測試。
+
+```
+extend_rear (element: G)
+  local
+    new_cell: LINKABLE[G]
+  do
+    create new_cell.put (element)
+    if is_empty then
+      first_linkable := new_cell
+      last_linkable := new_cell
+    else
+      check {l:LINKABLE[G]} last_linkable end
+      l.put_next (new_cell)
+      last_linkable := new_cell
+    end
+  ensure
+    last = element
+  end
+```
+
+我們使用物件測試 ```{l:LINKABLE[G]} last_linkable``` 來確保 last_linkable
+附帶在一個物件實體上。注意 else 的部分只有在串列非空時才會執行。
+
+### 習題
+
+- 實作 remove_first
+
+- 實作 remove_last 。為何這個功能較複雜？
+
+- 增加 ```count: INTEGER``` 屬性，紀錄串列內的元素個數。
+
+- 實作 ```item alias "[]" (i:INTEGER): G``` 函式，傳回第 i 個元素，假設 i 從
+0 開始
+
+- 保留 LINKABLE 類別不動的狀況下，修改 LINKED_LIST 類別，讓下面的迭代可以快
+速存取串列
+
+```
+from i:=0 until i=list.count loop
+  list[i].do_something
+  i := i+1
+end
+```
 
 # 中英對照
 
