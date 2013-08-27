@@ -1735,8 +1735,10 @@ end
 # 中英對照
 
 ```
+條約式設計 designed by contract
 類別 class
 物件 object
+泛型 generic type, genericity
 程序 procedure
 常式 routine
 函式 function
@@ -1751,6 +1753,7 @@ end
 後條件 postcondition
 不變性 invariant
 恆常性條件 consistency condition
+制約式 constrained
 參照 reference
 啟用 effect
 遵循 conform
